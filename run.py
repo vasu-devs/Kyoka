@@ -9,22 +9,34 @@ def get_python_executable():
     venv_path = os.path.join(os.getcwd(), "venv")
     if os.path.exists(venv_path):
         # Determine OS specific path
-        exec_path = os.path.join(venv_path, "bin", "python3")
+        if sys.platform == "win32":
+            exec_path = os.path.join(venv_path, "Scripts", "python.exe")
+        else:
+            exec_path = os.path.join(venv_path, "bin", "python3")
+            
         if os.path.exists(exec_path):
             return exec_path
     return sys.executable
 
-def run_command(command, cwd=None):
+def run_command(command, cwd=None, env=None):
     """Runs a command and returns the process."""
+    # Merge provided env with system env
+    process_env = os.environ.copy()
+    if env:
+        process_env.update(env)
+
     return subprocess.Popen(
         command,
         shell=True,
         cwd=cwd,
+        env=process_env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
         bufsize=1,
-        universal_newlines=True
+        universal_newlines=True,
+        encoding='utf-8',
+        errors='replace'
     )
 
 def main():
@@ -57,7 +69,12 @@ def main():
     processes = []
     try:
         print("📡 Starting FastAPI Backend (Port 8000)...")
-        backend_proc = run_command(f"{python_exec} -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload")
+        # Force UTF-8 encoding for backend to handle emojis/unicode correctly on Windows
+        backend_env = {"PYTHONIOENCODING": "utf-8"}
+        backend_proc = run_command(
+            f"{python_exec} -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload", 
+            env=backend_env
+        )
         processes.append(backend_proc)
 
         print("💻 Starting Vite Frontend (Port 5173)...")

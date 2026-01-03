@@ -1,67 +1,66 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme {
-  --color-google-blue: #4285F4;
-  --color-google-red: #EA4335;
-  --color-google-yellow: #FBBC04;
-  --color-google-green: #34A853;
+  --color-hueco-white: #FFFFFF;
+  --color-shinigami-black: #000000;
+  --color-hogyoku-purple: #7C3AED;
+  --color-hogyoku-indigo: #4F46E5;
+  --color-void: #09090b;
 
-  --font-sans: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Playfair Display', serif;
 
-  --animate-float: float 10s ease-in-out infinite;
-
-  @keyframes float {
-
-    0%,
-    100% {
-      transform: translateY(0) scale(1);
-    }
-
-    50% {
-      transform: translateY(-20px) scale(1.05);
-    }
-  }
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-@utility glass-card {
-  background-color: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+@utility shattered-glass {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0px;
+  /* Sharp corners like broken glass */
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.02);
 }
 
-@utility glass-card-hover {
-  transition-property: all;
-  transition-duration: 300ms;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 0 20px rgba(66, 133, 244, 0.1);
-  }
+@utility spiritual-pressure {
+  box-shadow: 0 0 40px -10px rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(124, 58, 237, 0.1);
 }
 
-@utility text-gradient {
+@utility btn-shinigami {
+  @apply bg-shinigami-black text-white px-6 py-2 uppercase tracking-[0.2em] text-xs font-bold transition-all duration-500 hover:bg-white hover:text-black border border-black;
+}
+
+@utility text-hogyoku {
   background-clip: text;
   color: transparent;
-  background-image: linear-gradient(to right, var(--color-google-blue), var(--color-google-red), var(--color-google-yellow));
+  background-image: linear-gradient(to right, var(--color-hogyoku-indigo), var(--color-hogyoku-purple));
 }
 
 @layer base {
   body {
-    @apply bg-[#05070A] text-slate-200 antialiased selection:bg-google-blue/30 selection:text-white font-sans;
+    @apply bg-hueco-white text-shinigami-black antialiased selection:bg-hogyoku-purple selection:text-white font-sans tracking-tight;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif tracking-tight;
   }
 }
 
 @layer utilities {
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
   }
 
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
+    width: 2px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -69,11 +68,11 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 9999px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 0px;
 
     &:hover {
-      background: rgba(66, 133, 244, 0.5);
+      background: var(--color-hogyoku-purple);
     }
   }
 }

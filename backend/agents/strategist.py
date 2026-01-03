@@ -32,10 +32,9 @@ TONE: Ruthless, Direct, Anti-Fluff.
 RULE: If the user is an Engineer, do NOT say 'Thank you for this opportunity'. Say 'Saw your repo, X is broken'.
 
 TARGET PROFILE:
-- DISC Type: {profile_data.get("disc_type", "Unknown")}
-- Communication Style: {profile_data.get("communication_style", "Unknown")}
+- Archetype: {profile_data.get("archetype", "Unknown")}
 - Triggers: {", ".join(profile_data.get("psychological_triggers", []))}
-- Summary: {profile_data.get("summary", "")}
+- Summary: {profile_data.get("profile_summary", "")}
 
 MEETING CONTEXT:
 {meeting_purpose}

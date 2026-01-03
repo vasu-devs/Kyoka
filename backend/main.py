@@ -1,7 +1,9 @@
+import sys
+import os
+import io
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import os
-from dotenv import load_dotenv
 from .schemas import ProfileRequest, ProfileResponse, ChatRequest, ChatMessage
 from .agents.researcher import DeepResearchAgent
 from .agents.profiler import PsychProfiler
@@ -9,8 +11,20 @@ from .agents.strategist import MeetingStrategist
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 
+# Force UTF-8 encoding for stdout/stderr to prevent 'charmap' errors on Windows
+if sys.platform == "win32":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 # Load environment variables
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+
+# Verify critical API keys
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if not GOOGLE_API_KEY:
+    print("❌ WARNING: GOOGLE_API_KEY is missing in .env! Features will fail.")
+elif len(GOOGLE_API_KEY) < 10:
+    print("⚠️ WARNING: GOOGLE_API_KEY looks invalid (too short).")
 
 app = FastAPI(title="The Mentalist API")
 
@@ -135,23 +149,22 @@ async def chat_simulation(req: ChatRequest):
         )
         
         profile = req.profile
-        style_rules = "\n- ".join(profile.get('speaking_style_guidelines', []))
+        simulation_prompt = profile.get('simulation_prompt', "Act as the persona described in the psychology profile.")
         
         system_prompt = f"""
-        You are a Roleplay Actor. You are acting as: {req.target_name}.
+        KYOKA SIMULATION ACTIVE.
         
-        --- PSYCHOLOGY ---
-        {profile.get('summary')}
-        
-        --- SPEAKING STYLE (MUST FOLLOW) ---
-        - {style_rules}
+        {simulation_prompt}
+
+        --- PSYCHOLOGICAL BASELINE ---
+        {profile.get('profile_summary', '')}
         
         --- CONTEXT ---
         You are replying to a message regarding: {req.context}
         
         --- CRITICAL INSTRUCTIONS ---
-        1. STRICTLY mimic the persona defined in the style rules.
-        2. Do not break character.
+        1. SUSTAIN THE PERSONA.
+        2. Do not reveal you are an AI or part of KYOKA.
         """
         
         messages = [SystemMessage(content=system_prompt)]

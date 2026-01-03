@@ -22,7 +22,7 @@ function App() {
     setTargetName(name);
     setMeetingContext(context);
     setProfileData(null);
-    
+
     try {
       // Use EventSource for real-time streaming
       const url = `/api/analyze/stream?name=${encodeURIComponent(name)}&context=${encodeURIComponent(context)}`;
@@ -30,7 +30,7 @@ function App() {
 
       eventSource.onmessage = (event) => {
         const payload = JSON.parse(event.data);
-        
+
         if (payload.type === 'status') {
           setLogs(prev => [...prev, payload.data]);
         } else if (payload.type === 'final') {
@@ -66,65 +66,68 @@ function App() {
     <Layout>
       {!profileData ? (
         <div className="py-10">
-           <div className="text-center mb-10 space-y-4">
-              <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-                Decode Psychology. <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-google-blue to-purple-500">
-                  Win Every Interaction.
-                </span>
-              </h2>
-              <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-                Stop guessing. Start knowing who you're dealing with using advanced AI behavioral profiling and real-time conversation simulation.
-              </p>
-           </div>
-           
-           <InputForm onSubmit={handleAnalysis} loading={loading} logs={logs} />
+          <div className="text-center mb-10 space-y-4">
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+              Decode Psychology. <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-google-blue to-brand-purple">
+                Win Every Interaction.
+              </span>
+            </h2>
+            <p className="text-[15px] text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
+              Stop guessing. Start knowing who you're dealing with using advanced AI behavioral profiling and real-time conversation simulation.
+            </p>
+          </div>
+
+          <InputForm onSubmit={handleAnalysis} loading={loading} logs={logs} />
         </div>
       ) : (
         <div className="space-y-12 pb-20">
           <div className="flex items-center justify-between">
-             <h2 className="text-2xl font-bold border-l-4 border-google-green pl-4">
-               Analysis Results: <span className="text-google-blue">{targetName}</span>
-             </h2>
-             <button 
-                onClick={() => setProfileData(null)}
-                className="text-sm text-gray-400 hover:text-white transition-colors underline"
-             >
-                Start New Analysis
-             </button>
+            <h2 className="text-2xl font-black text-slate-900 border-l-4 border-google-green pl-4 uppercase tracking-tighter">
+              Analysis Results: <span className="text-google-blue">{targetName}</span>
+            </h2>
+            <button
+              onClick={() => setProfileData(null)}
+              className="text-[10px] font-bold text-slate-400 hover:text-google-blue transition-colors underline uppercase tracking-widest"
+            >
+              Start New Analysis
+            </button>
           </div>
 
-          <ResultsView 
-            profile={profileData} 
-            strategy={strategyDoc} 
-            thoughtProcess={thoughtProcess} 
+          <ResultsView
+            profile={profileData}
+            strategy={strategyDoc}
+            thoughtProcess={thoughtProcess}
             sources={sources}
           />
 
           <div className="mt-16">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 border-l-4 border-purple-500 pl-4">
-               <span className="text-purple-400">Live Simulator</span>
+            <h2 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-2 border-l-4 border-brand-purple pl-4 uppercase tracking-tighter">
+              Live <span className="text-brand-purple">Simulator</span>
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-               <div className="lg:col-span-1 space-y-4">
-                  <div className="glass-card p-6">
-                     <h4 className="font-semibold text-white mb-2">Simulation Context</h4>
-                     <p className="text-sm text-gray-400">{meetingContext}</p>
-                  </div>
-                  <div className="glass-card p-6 border-l-2 border-google-yellow">
-                     <h4 className="font-semibold text-white mb-2">Pro Tip</h4>
-                     <p className="text-sm text-gray-400">
-                       Use the psychological triggers found in the profile to steer the conversation.
-                     </p>
-                  </div>
-               </div>
-               <div className="lg:col-span-2">
-                  <ChatSimulator 
-                    targetName={targetName} 
-                    context={meetingContext} 
-                    profile={profileData} 
-                  />
-               </div>
+              <div className="lg:col-span-1 space-y-6">
+                <div className="glass-card p-6 bg-white/90 shadow-lg border border-slate-200">
+                  <h4 className="text-xs font-bold text-slate-900 mb-3 uppercase tracking-widest">Simulation Context</h4>
+                  <p className="text-sm text-slate-500 leading-relaxed font-medium">{meetingContext}</p>
+                </div>
+                <div className="glass-card p-6 bg-white/90 shadow-lg border-l-4 border-l-google-yellow border-y-slate-200 border-r-slate-200">
+                  <h4 className="text-xs font-bold text-slate-900 mb-3 uppercase tracking-widest flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-google-yellow" />
+                    Pro Tip
+                  </h4>
+                  <p className="text-sm text-slate-500 leading-relaxed font-medium italic">
+                    Use the psychological triggers found in the profile to steer the conversation effectively.
+                  </p>
+                </div>
+              </div>
+              <div className="lg:col-span-2">
+                <ChatSimulator
+                  targetName={targetName}
+                  context={meetingContext}
+                  profile={profileData}
+                />
+              </div>
             </div>
           </div>
         </div>

@@ -23,26 +23,46 @@ class LLMProvider(Enum):
 
 def extract_json(text: str) -> Dict[str, Any]:
     """
-    Robustly extract JSON from LLM response.
-    Handles markdown code blocks and raw JSON.
+    Robustly extract JSON from LLM response using brace counting.
+    Handles markdown code blocks, raw JSON, and text noise.
     """
-    # Try to find JSON in markdown code block
-    json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
-    if json_match:
-        json_str = json_match.group(1)
-    else:
-        # Try to find raw JSON (first { to last })
-        start_idx = text.find('{')
-        end_idx = text.rfind('}')
-        if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
-            json_str = text[start_idx:end_idx + 1]
-        else:
-            return {}
-    
-    try:
-        return json.loads(json_str)
-    except json.JSONDecodeError:
+    # Try to find a JSON block starting with {
+    start_idx = text.find('{')
+    if start_idx == -1:
         return {}
+
+    # Balanced brace counting
+    brace_count = 0
+    json_str = ""
+    for i in range(start_idx, len(text)):
+        char = text[i]
+        if char == '{':
+            brace_count += 1
+        elif char == '}':
+            brace_count -= 1
+        
+        json_str += char
+        
+        if brace_count == 0:
+            # Found the end of the JSON object
+            try:
+                # Clean up potential markdown noise like ```json or whitespace
+                cleaned_json = json_str.strip()
+                return json.loads(cleaned_json)
+            except json.JSONDecodeError:
+                # If this specific block failed, keep searching for another candidate
+                pass
+    
+    # Final fallback attempt if brace counting logic was somehow skipped or failed partially
+    try:
+        # Try finding markdown block as secondary
+        json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+        if json_match:
+            return json.loads(json_match.group(1))
+    except:
+        pass
+
+    return {}
 
 
 def extract_think_block(text: str) -> tuple[str, str]:
@@ -105,9 +125,9 @@ def get_google_response(
     """Get response from Google Gemini 1.5 Flash."""
     import google.generativeai as genai
     
-    api_key = os.getenv("GOOGLE_API_KEY")
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
     if not api_key:
-        raise ValueError("GOOGLE_API_KEY not set in environment")
+        raise ValueError("GOOGLE_API_KEY or GEMINI_API_KEY not set in environment")
     
     genai.configure(api_key=api_key)
     
@@ -155,17 +175,17 @@ def get_llm_response(
     """
     try:
         if provider == LLMProvider.DEEPSEEK:
-            print(f"🧠 Using DeepSeek-V3 for inference...")
+            print(f"INFO: Using DeepSeek-V3 for inference...")
             return get_deepseek_response(prompt, system_prompt, temperature)
         else:
-            print(f"✨ Using Gemini Flash (latest) for inference...")
+            print(f"INFO: Using Gemini Flash (latest) for inference...")
             return get_google_response(prompt, system_prompt, temperature)
     
     except Exception as e:
-        print(f"⚠️ {provider.value} failed: {e}")
+        print(f"WARN: {provider.value} failed: {e}")
         
         if fallback and provider == LLMProvider.DEEPSEEK:
-            print("🔄 Falling back to Gemini 1.5 Flash...")
+            print("INFO: Falling back to Gemini 1.5 Flash...")
             return get_google_response(prompt, system_prompt, temperature)
         
         raise
