@@ -43,20 +43,23 @@ class DeepResearchAgent:
                     max_results=3
                 )
                 
+                res_count = 0
                 if response and 'results' in response:
+                    res_count = len(response['results'])
                     for result in response['results']:
                         url = result.get('url')
                         if url not in seen_urls:
                             seen_urls.add(url)
                             all_sources.append(url)
                             content = result.get('raw_content') or result.get('content', '')
-                            # Limiting content per source to avoid exploding context too much, 
-                            # but keeping it generous for Gemini 2.0 Flash (1M tokens)
+                            # Limiting content per source to avoid exploding context too much
                             if len(content) > 10000: 
                                 content = content[:10000] + "...(truncated)"
                             all_text.append(f"\n--- Source: {url} ---\n{content}")
+                
+                print(f"DEBUG: Tavily search for '{query}' returned {res_count} results.")
             except Exception as e:
-                print(f"Search Error for '{query}': {e}")
+                print(f"ERROR: Search Error for '{query}': {e}")
 
         # 1. Initial Searches
         queries = [

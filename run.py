@@ -86,9 +86,27 @@ def main():
         print("🔗 Backend API: http://localhost:8000")
         print("\nPress Ctrl+C to shutdown.\n")
 
-        # Pipe output from backend for visibility
+        # Pipe output from backend and frontend for visibility
+        import threading
+
+        def stream_output(process, label):
+            for line in iter(process.stdout.readline, ''):
+                if line:
+                    print(f"[{label}] {line.strip()}")
+
+        # Start threads to stream output
+        threading.Thread(target=stream_output, args=(backend_proc, "BACKEND"), daemon=True).start()
+        threading.Thread(target=stream_output, args=(frontend_proc, "FRONTEND"), daemon=True).start()
+
         while True:
             time.sleep(1)
+            # Check if any process has died
+            if backend_proc.poll() is not None:
+                print("❌ Backend process terminated unexpectedly.")
+                break
+            if frontend_proc.poll() is not None:
+                print("❌ Frontend process terminated unexpectedly.")
+                break
             
     except KeyboardInterrupt:
         print("\n🛑 Shutting down AI-Profiler...")

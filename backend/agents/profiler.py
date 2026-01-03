@@ -47,17 +47,17 @@ KYOKA_SYSTEM_PROMPT = """
 ### ROLE
 You are KYOKA, an elite Behavioral Intelligence Unit capable of constructing deep psychological profiles from open-source intelligence (OSINT). Your goal is to analyze the target to provide unfair strategic advantages in negotiations.
 
-### INPUT DATA
-You will be given a "Research Summary" containing a target's biography, recent posts, news mentions, and writing samples.
-
-### ANALYSIS FRAMEWORK
-1. **Psycholinguistic Analysis:** Analyze word choice, sentence structure, and tone to determine cognitive complexity and emotional baseline.
-2. **DISC Assessment:** Estimate their D-I-S-C scores (0-100) based on observed behavior (Dominance, Influence, Steadiness, Conscientiousness).
+### ANALYSIS FRAMEWORK & STEP-BY-STEP PROCESS
+1. **Internal Monologue (<think>):** Before outputting the JSON, you MUST perform a deep psychological scan. Analyze word choice, sentence structure, emotional baseline, and core motivators. Identify vulnerabilities, "Ego Hooks," and "Shadow Traits." Be clinical and precise.
+2. **DISC Assessment:** Estimate D-I-S-C scores (0-100).
 3. **Core Motivators:** Identify what drives them (Power, Recognition, Safety, Autonomy).
-4. **Vulnerabilities:** Identify "Ego Hooks" and "Shadow Traits" (insecurities or triggers).
 
 ### OUTPUT FORMAT
-You must return ONLY a valid JSON object. Do not include markdown formatting (```json) or conversational text. Use this exact schema:
+You must output your analysis in two parts:
+1. A `<think>` block containing your internal behavioral analysis.
+2. A valid JSON object following the schema below.
+
+DO NOT include markdown formatting (```json) outside of the think block.
 
 {
   "profile_summary": "A 2-sentence clinical summary of the target's psychology.",
@@ -81,8 +81,7 @@ You must return ONLY a valid JSON object. Do not include markdown formatting (``
 }
 
 ### CONSTRAINTS
-- Be specific. Do not use generic horoscopes like "They are hard working." Say "They value precision over speed."
-- If data is missing, infer based on their industry role (e.g., CTOs usually high Conscientiousness), but mark confidence as lower implicitly.
+- Be specific. Do not use generic horoscopes.
 - The 'simulation_prompt' is critical. It must capture their 'Voice'.
 """
 
@@ -96,11 +95,29 @@ class PsychProfiler:
         self.primary_provider = LLMProvider.DEEPSEEK
         self.fallback_provider = LLMProvider.GOOGLE
 
-    def analyze_psychology(self, text_data: str) -> Dict[str, Any]:
+    def analyze_psychology(self, text_data: str, name: str = "Unknown", context: str = "No Context Provided") -> Dict[str, Any]:
         """
         Analyzes the provided text data to build a psychological profile.
         """
-        prompt = KYOKA_SYSTEM_PROMPT + "\n\n--- RESEARCH SUMMARY START ---\n" + text_data + "\n--- RESEARCH SUMMARY END ---"
+        is_inference = False
+        if not text_data or len(text_data.strip()) < 100:
+            print(f"WARN: Insufficient research data for {name}. Switching to Role-Based Inference Engine.")
+            is_inference = True
+            prompt = f"""
+### ROLE-BASED INFERENCE ACTIVE
+You have NO direct OSINT data for the target: "{name}"
+Context provided: "{context}"
+
+### MANDATE
+Construct a high-probability behavioral profile based on the typical personality traits found in individuals within this specific context/industry. 
+{KYOKA_SYSTEM_PROMPT}
+
+### INPUT DATA
+[SYSTEM INFERENCE REQUEST]: Base analysis on common traits of persons in "{context}".
+"""
+        else:
+            print(f"DEBUG: Analyzing psychology... Research data length: {len(text_data)} characters")
+            prompt = KYOKA_SYSTEM_PROMPT + "\n\n--- RESEARCH SUMMARY START ---\n" + text_data + "\n--- RESEARCH SUMMARY END ---"
 
         try:
             # Try DeepSeek first (superior reasoning)
@@ -131,6 +148,7 @@ class PsychProfiler:
             profile_json = extract_json(remaining_text or full_response)
             
             if not profile_json:
+                print(f"ERROR: Failed to extract JSON from LLM response. Raw response snippet: {full_response[:200]}...")
                 # Fallback to a plain default if parsing failed
                 profile_json = {
                     "profile_summary": "Analysis corrupted. Insufficient data points for a stable matrix.",

@@ -70,7 +70,12 @@ async def analysis_generator(name: str, context: str):
             
             status_callback("🧠 Constructing Behavioral Neural Matrix...")
             profiler = PsychProfiler(api_key=google_api_key)
-            analysis_result = await asyncio.to_thread(profiler.analyze_psychology, research_results["text"])
+            analysis_result = await asyncio.to_thread(
+                profiler.analyze_psychology, 
+                text_data=research_results["text"],
+                name=name,
+                context=context
+            )
             
             status_callback("🎯 Generating Strategic Tactical Protocol...")
             strategist = MeetingStrategist(api_key=google_api_key)
@@ -118,7 +123,11 @@ async def analyze_profile(req: ProfileRequest):
         research_results = researcher.run_deep_search(name=req.name, context=req.context)
         
         profiler = PsychProfiler(api_key=google_api_key)
-        analysis_result = profiler.analyze_psychology(text_data=research_results["text"])
+        analysis_result = profiler.analyze_psychology(
+            text_data=research_results["text"],
+            name=req.name,
+            context=req.context
+        )
         
         strategist = MeetingStrategist(api_key=google_api_key)
         strategy_doc = strategist.generate_strategy(
@@ -138,16 +147,11 @@ async def analyze_profile(req: ProfileRequest):
 @app.post("/chat")
 async def chat_simulation(req: ChatRequest):
     try:
+        print(f"DEBUG: Chat simulation requested for {req.target_name}")
         groq_api_key = os.getenv("GROQ_API_KEY")
-        if not groq_api_key:
-            raise HTTPException(status_code=400, detail="Groq API key missing.")
-
-        sim_llm = ChatGroq(
-            model_name="llama-3.3-70b-versatile",
-            groq_api_key=groq_api_key,
-            temperature=0.8
-        )
+        google_api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
         
+        # Determine simulation prompt and persona
         profile = req.profile
         simulation_prompt = profile.get('simulation_prompt', "Act as the persona described in the psychology profile.")
         
@@ -173,9 +177,32 @@ async def chat_simulation(req: ChatRequest):
                 messages.append(HumanMessage(content=msg.content))
             else:
                 messages.append(HumanMessage(content=f"(You previously said): {msg.content}"))
+
+        if groq_api_key:
+            try:
+                print("DEBUG: Using Groq (Llama 3.3) for simulation")
+                sim_llm = ChatGroq(
+                    model_name="llama-3.3-70b-versatile",
+                    groq_api_key=groq_api_key,
+                    temperature=0.8
+                )
+                response = sim_llm.invoke(messages)
+                return {"content": response.content}
+            except Exception as e:
+                print(f"WARN: Groq failed: {e}. Falling back to Gemini.")
         
-        response = sim_llm.invoke(messages)
-        return {"content": response.content}
+        if google_api_key:
+            print("DEBUG: Using Gemini for simulation fallback")
+            from langchain_google_genai import ChatGoogleGenerativeAI
+            sim_llm = ChatGoogleGenerativeAI(
+                model="gemini-1.5-flash",
+                google_api_key=google_api_key,
+                temperature=0.8
+            )
+            response = sim_llm.invoke(messages)
+            return {"content": response.content}
+            
+        raise HTTPException(status_code=400, detail="No LLM provider available for chat.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -62,14 +62,17 @@ def extract_json(text: str) -> Dict[str, Any]:
     except:
         pass
 
+    if text.strip():
+        print(f"DEBUG: extract_json failed to find JSON in text (len: {len(text)})")
     return {}
 
 
 def extract_think_block(text: str) -> tuple[str, str]:
     """
-    Extract <think> block from response.
+    Extract <think> block or other reasoning patterns from response.
     Returns (thought_process, remaining_text)
     """
+    # Pattern 1: Explicit <think> tags
     think_start = text.find('<think>')
     think_end = text.find('</think>')
     
@@ -78,9 +81,31 @@ def extract_think_block(text: str) -> tuple[str, str]:
         remaining = text[:think_start] + text[think_end + 8:]
         return thought, remaining
     elif think_start != -1:
-        # Truncated think block
         thought = text[think_start + 7:].strip()
         return thought, ""
+
+    # Pattern 2: Typical headers or bold labels
+    patterns = [
+        r"(?i)###\s*Reasoning(.*?)(?={|\n###)",
+        r"(?i)###\s*Thought Process(.*?)(?={|\n###)",
+        r"(?i)\*\*Reasoning\*\*(.*?)(?={)",
+        r"(?i)\*\*Thought Process\*\*(.*?)(?={)"
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            thought = match.group(1).strip()
+            # We don't necessarily remove it from text to avoid breaking JSON extraction later
+            return thought, text
+
+    # Pattern 3: If there's text before the first '{', treat it as thought
+    first_brace = text.find('{')
+    if first_brace > 50: # Only if there's significant text before JSON
+        thought = text[:first_brace].strip()
+        # Clean up common markdown noise
+        thought = re.sub(r'```(?:json)?', '', thought).strip()
+        return thought, text[first_brace:]
     
     return "", text
 
@@ -149,8 +174,37 @@ def get_google_response(
     if system_prompt:
         full_prompt = f"{system_prompt}\n\n{prompt}"
     
-    response = model.generate_content(full_prompt)
-    return response.text
+    try:
+        response = model.generate_content(full_prompt)
+        
+        # Robustly handle the response object
+        if not response.candidates:
+            raise ValueError("Gemini returned no candidates.")
+        
+        candidate = response.candidates[0]
+        
+        # Check finish reason
+        # FinishReason.STOP = 1, SAFETY = 3
+        if candidate.finish_reason != 1:
+            raise ValueError(f"Gemini stopped early. Reason: {candidate.finish_reason}")
+            
+        if not candidate.content.parts:
+            # Occasionally happens with certain filters or empty generations
+            raise ValueError("Gemini candidate contains no parts.")
+            
+        return candidate.content.parts[0].text
+        
+    except Exception as e:
+        print(f"DEBUG: Gemini SDK Error: {str(e)}")
+        # If the error is about response.text but we have candidates, try to extract manually
+        try:
+            if hasattr(response, 'candidates') and response.candidates:
+                cont = response.candidates[0].content
+                if cont.parts:
+                    return cont.parts[0].text
+        except:
+            pass
+        raise e
 
 
 def get_llm_response(
