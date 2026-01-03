@@ -1,7 +1,11 @@
-streamlit
+fastapi
+uvicorn
+python-multipart
+pydantic
+python-dotenv
 langchain-google-genai
 langchain-groq
 tavily-python
 plotly
-pydantic
-python-dotenv
+google-generativeai
+openai

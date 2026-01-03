@@ -2,9 +2,11 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
-from agents.researcher import DeepResearchAgent
-from agents.profiler import PsychProfiler
-from agents.strategist import MeetingStrategist
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from backend.agents.researcher import DeepResearchAgent
+from backend.agents.profiler import PsychProfiler
+from backend.agents.strategist import MeetingStrategist
 import plotly.graph_objects as go
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_groq import ChatGroq
