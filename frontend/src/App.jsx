@@ -67,9 +67,9 @@ function App() {
       {!profileData ? (
         <div className="py-10">
           <div className="text-center mb-10 space-y-4">
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            <h2 className="text-4xl md:text-5xl font-black text-shinigami-black tracking-tight leading-tight">
               Decode Psychology. <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-google-blue to-brand-purple">
+              <span className="text-hogyoku">
                 Win Every Interaction.
               </span>
             </h2>
@@ -83,12 +83,12 @@ function App() {
       ) : (
         <div className="space-y-12 pb-20">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-black text-slate-900 border-l-4 border-google-green pl-4 uppercase tracking-tighter">
-              Analysis Results: <span className="text-google-blue">{targetName}</span>
+            <h2 className="text-2xl font-black text-shinigami-black border-l-4 border-hogyoku-purple pl-4 uppercase tracking-tighter">
+              Analysis Results: <span className="text-hogyoku-purple">{targetName}</span>
             </h2>
             <button
               onClick={() => setProfileData(null)}
-              className="text-[10px] font-bold text-slate-400 hover:text-google-blue transition-colors underline uppercase tracking-widest"
+              className="text-[10px] font-bold text-gray-400 hover:text-shinigami-black transition-colors underline uppercase tracking-widest cursor-pointer"
             >
               Start New Analysis
             </button>
@@ -102,8 +102,8 @@ function App() {
           />
 
           <div className="mt-16">
-            <h2 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-2 border-l-4 border-brand-purple pl-4 uppercase tracking-tighter">
-              Live <span className="text-brand-purple">Simulator</span>
+            <h2 className="text-2xl font-black text-shinigami-black mb-8 flex items-center gap-2 border-l-4 border-hogyoku-purple pl-4 uppercase tracking-tighter">
+              Live <span className="text-hogyoku-purple">Simulator</span>
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-1 space-y-6">
@@ -111,9 +111,9 @@ function App() {
                   <h4 className="text-xs font-bold text-slate-900 mb-3 uppercase tracking-widest">Simulation Context</h4>
                   <p className="text-sm text-slate-500 leading-relaxed font-medium">{meetingContext}</p>
                 </div>
-                <div className="glass-card p-6 bg-white/90 shadow-lg border-l-4 border-l-google-yellow border-y-slate-200 border-r-slate-200">
-                  <h4 className="text-xs font-bold text-slate-900 mb-3 uppercase tracking-widest flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-google-yellow" />
+                <div className="glass-card p-6 bg-white/90 shadow-lg border-l-4 border-l-hogyoku-indigo border-y-black/5 border-r-black/5">
+                  <h4 className="text-xs font-bold text-shinigami-black mb-3 uppercase tracking-widest flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-hogyoku-indigo" />
                     Pro Tip
                   </h4>
                   <p className="text-sm text-slate-500 leading-relaxed font-medium italic">

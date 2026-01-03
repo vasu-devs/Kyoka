@@ -40,6 +40,7 @@ class PersonalityProfile(BaseModel):
     archetype: str
     psychological_triggers: list[str]
     negotiation_strategy: NegotiationStrategy
+    social_links: list[dict[str, str]] = []
     simulation_prompt: str
 
 
@@ -77,6 +78,10 @@ DO NOT include markdown formatting (```json) outside of the think block.
     "dont": ["Avoid 1", "Avoid 2"],
     "leverage_point": "The specific thing they care about most (e.g., 'Reputation risk')"
   },
+  "social_links": [
+    { "platform": "LinkedIn", "url": "https://linkedin.com/in/username" },
+    { "platform": "X (Twitter)", "url": "https://x.com/username" }
+  ],
   "simulation_prompt": "A concise system instruction for another LLM to roleplay as this person. Include speech quirks, tone, and typical sentence length."
 }
 
@@ -160,6 +165,7 @@ Construct a high-probability behavioral profile based on the typical personality
                         "dont": ["Make aggressive assumptions"],
                         "leverage_point": "Information asymmetry"
                     },
+                    "social_links": [],
                     "simulation_prompt": "Speak in vague, defensive tones. Avoid specifics. You feel being watched."
                 }
 
@@ -176,6 +182,7 @@ Construct a high-probability behavioral profile based on the typical personality
                     "archetype": "Error",
                     "psychological_triggers": ["System malfunction"],
                     "negotiation_strategy": {"do": [], "dont": [], "leverage_point": "None"},
+                    "social_links": [],
                     "simulation_prompt": "You are a broken AI. Glitch in the matrix."
                 },
                 "thought_process": f"Error: {str(e)}"
