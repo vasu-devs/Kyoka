@@ -60,30 +60,20 @@ Include your internal behavioral analysis in the "thought_process" field.
 
 DO NOT include any markdown formatting or text outside the JSON object.
 
+Example Structure:
 {
-  "thought_process": "Detailed internal monologue analyzing the subject...",
-  "profile_summary": "A 2-sentence clinical summary of the target's psychology.",
-  "disc_scores": {
-    "dominance": 0, 
-    "influence": 0, 
-    "steadiness": 0, 
-    "conscientiousness": 0 
-  },
-  "archetype": "The Visionary / The Operator / The Guardian / The Rebel",
-  "psychological_triggers": [
-    "Trigger 1 (e.g., Dislikes inefficiency)",
-    "Trigger 2 (e.g., Seeks public validation)"
-  ],
+  "thought_process": "Target displays high conscientiousness...",
+  "profile_summary": "Target is a meticulous architect...",
+  "disc_scores": { "dominance": 60, "influence": 40, "steadiness": 50, "conscientiousness": 90 },
+  "archetype": "The Operator",
+  "psychological_triggers": ["Inefficiency", "Vague requirements"],
   "negotiation_strategy": {
-    "do": ["Tactic 1", "Tactic 2"],
-    "dont": ["Avoid 1", "Avoid 2"],
-    "leverage_point": "The specific thing they care about most (e.g., 'Reputation risk')"
+    "do": ["Be precise"],
+    "dont": ["Waste time"],
+    "leverage_point": "Efficiency"
   },
-  "social_links": [
-    { "platform": "LinkedIn", "url": "https://linkedin.com/in/username" },
-    { "platform": "X (Twitter)", "url": "https://x.com/username" }
-  ],
-  "simulation_prompt": "A concise system instruction for another LLM to roleplay as this person. Include speech quirks, tone, and typical sentence length."
+  "social_links": [],
+  "simulation_prompt": "Speak concisely."
 }
 
 ### CONSTRAINTS
@@ -167,10 +157,10 @@ Construct a high-probability behavioral profile based on the typical personality
                     "simulation_prompt": "Speak in vague, defensive tones. Avoid specifics. You feel being watched."
                 }
                 # Attach the raw response to thought_process so the user can see what went wrong
-                thought_process += f"\n\n[SYSTEM ERROR] Failed to parse JSON. Raw Output:\n{full_response}"
-
-            # Extract thought_process from the valid JSON
-            thought_process = profile_json.get("thought_process", "Thinking deep... Matrix construction in progress.")
+                thought_process = profile_json["thought_process"] + f"\n\n[SYSTEM ERROR] Failed to parse JSON. Raw Output:\n{full_response}"
+            else:
+                # Extract thought_process from the valid JSON
+                thought_process = profile_json.get("thought_process", "Thinking deep... Matrix construction in progress.")
 
             return {
                 "profile": profile_json,

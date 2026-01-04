@@ -195,7 +195,7 @@ async def chat_simulation(req: ChatRequest):
             print("DEBUG: Using Gemini for simulation fallback")
             from langchain_google_genai import ChatGoogleGenerativeAI
             sim_llm = ChatGoogleGenerativeAI(
-                model="gemini-1.5-flash",
+                model="gemini-flash-latest",
                 google_api_key=google_api_key,
                 temperature=0.8
             )
