@@ -145,7 +145,8 @@ def get_deepseek_response(
 def get_google_response(
     prompt: str,
     system_prompt: Optional[str] = None,
-    temperature: float = 0.0
+    temperature: float = 0.0,
+    json_mode: bool = False
 ) -> str:
     """Get response from Google Gemini 1.5 Flash."""
     import google.generativeai as genai
@@ -164,10 +165,14 @@ def get_google_response(
         {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
     ]
     
+    generation_config = {"temperature": temperature}
+    if json_mode:
+        generation_config["response_mime_type"] = "application/json"
+
     model = genai.GenerativeModel(
         model_name="gemini-flash-latest",  # Stable alias - always works
         safety_settings=safety_settings,
-        generation_config={"temperature": temperature}
+        generation_config=generation_config
     )
     
     full_prompt = prompt
@@ -212,7 +217,8 @@ def get_llm_response(
     provider: LLMProvider = LLMProvider.GOOGLE,
     temperature: float = 0.0,
     system_prompt: Optional[str] = None,
-    fallback: bool = True
+    fallback: bool = True,
+    json_mode: bool = False
 ) -> str:
     """
     Unified LLM response function.
@@ -233,13 +239,13 @@ def get_llm_response(
             return get_deepseek_response(prompt, system_prompt, temperature)
         else:
             print(f"INFO: Using Gemini Flash (latest) for inference...")
-            return get_google_response(prompt, system_prompt, temperature)
+            return get_google_response(prompt, system_prompt, temperature, json_mode)
     
     except Exception as e:
         print(f"WARN: {provider.value} failed: {e}")
         
         if fallback and provider == LLMProvider.DEEPSEEK:
             print("INFO: Falling back to Gemini 1.5 Flash...")
-            return get_google_response(prompt, system_prompt, temperature)
+            return get_google_response(prompt, system_prompt, temperature, json_mode)
         
         raise

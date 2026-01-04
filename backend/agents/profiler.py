@@ -135,7 +135,8 @@ Construct a high-probability behavioral profile based on the typical personality
                         prompt=prompt,
                         provider=self.primary_provider,
                         temperature=0.0,
-                        fallback=True
+                        fallback=True,
+                        json_mode=True
                     )
                     break
                 except Exception as e:
@@ -168,6 +169,8 @@ Construct a high-probability behavioral profile based on the typical personality
                     "social_links": [],
                     "simulation_prompt": "Speak in vague, defensive tones. Avoid specifics. You feel being watched."
                 }
+                # Attach the raw response to thought_process so the user can see what went wrong
+                thought_process += f"\n\n[SYSTEM ERROR] Failed to parse JSON. Raw Output:\n{full_response}"
 
             return {
                 "profile": profile_json,
