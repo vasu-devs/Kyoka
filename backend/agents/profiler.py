@@ -35,6 +35,7 @@ class NegotiationStrategy(BaseModel):
 
 
 class PersonalityProfile(BaseModel):
+    thought_process: str = Field(description="Internal behavioral analysis and reasoning")
     profile_summary: str
     disc_scores: DiscScores
     archetype: str
@@ -54,13 +55,13 @@ You are KYOKA, an elite Behavioral Intelligence Unit capable of constructing dee
 3. **Core Motivators:** Identify what drives them (Power, Recognition, Safety, Autonomy).
 
 ### OUTPUT FORMAT
-You must output your analysis in two parts:
-1. A `<think>` block containing your internal behavioral analysis.
-2. A valid JSON object following the schema below.
+You must output your analysis as a SINGLE valid JSON object.
+Include your internal behavioral analysis in the "thought_process" field.
 
-DO NOT include markdown formatting (```json) outside of the think block.
+DO NOT include any markdown formatting or text outside the JSON object.
 
 {
+  "thought_process": "Detailed internal monologue analyzing the subject...",
   "profile_summary": "A 2-sentence clinical summary of the target's psychology.",
   "disc_scores": {
     "dominance": 0, 
@@ -145,18 +146,14 @@ Construct a high-probability behavioral profile based on the typical personality
                     print(f"WARN: Attempt {attempt + 1} failed, retrying...")
                     time.sleep(2)
 
-            # Extract thought process if it exists (DeepSeek and some Gemini models might include it)
-            thought_process, remaining_text = extract_think_block(full_response)
-            if not thought_process:
-                thought_process = "Thinking deep... Matrix construction in progress."
-
             # Extract JSON profile
-            profile_json = extract_json(remaining_text or full_response)
+            profile_json = extract_json(full_response)
             
             if not profile_json:
                 print(f"ERROR: Failed to extract JSON from LLM response. Raw response snippet: {full_response[:200]}...")
                 # Fallback to a plain default if parsing failed
                 profile_json = {
+                    "thought_process": "Analysis corrupted. Insufficient data points for a stable matrix.",
                     "profile_summary": "Analysis corrupted. Insufficient data points for a stable matrix.",
                     "disc_scores": {"dominance": 50, "influence": 50, "steadiness": 50, "conscientiousness": 50},
                     "archetype": "The Unknown",
@@ -171,6 +168,9 @@ Construct a high-probability behavioral profile based on the typical personality
                 }
                 # Attach the raw response to thought_process so the user can see what went wrong
                 thought_process += f"\n\n[SYSTEM ERROR] Failed to parse JSON. Raw Output:\n{full_response}"
+
+            # Extract thought_process from the valid JSON
+            thought_process = profile_json.get("thought_process", "Thinking deep... Matrix construction in progress.")
 
             return {
                 "profile": profile_json,
