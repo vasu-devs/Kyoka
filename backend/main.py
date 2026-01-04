@@ -156,7 +156,8 @@ async def chat_simulation(req: ChatRequest):
         simulation_prompt = profile.get('simulation_prompt', "Act as the persona described in the psychology profile.")
         
         system_prompt = f"""
-        KYOKA SIMULATION ACTIVE.
+        --- SYSTEM INSTRUCTION ---
+        You are simulating the persona below. Your goal is to have a natural, realistic conversation.
         
         {simulation_prompt}
 
@@ -164,11 +165,13 @@ async def chat_simulation(req: ChatRequest):
         {profile.get('profile_summary', '')}
         
         --- CONTEXT ---
-        You are replying to a message regarding: {req.context}
+        Message Topic: {req.context}
         
-        --- CRITICAL INSTRUCTIONS ---
-        1. SUSTAIN THE PERSONA.
-        2. Do not reveal you are an AI or part of KYOKA.
+        --- INTERACTION GUIDELINES ---
+        1. ACT NATURAL. If the user says "hi", say hi back. Do not be weirdly aggressive unless the persona demands it.
+        2. Adopt the speech patterns, tone, and vocabulary of the target.
+        3. Do not reveal you are an AI.
+        4. Keep responses valid to the context. If it's a casual greeting, respond casually.
         """
         
         messages = [SystemMessage(content=system_prompt)]
@@ -178,18 +181,19 @@ async def chat_simulation(req: ChatRequest):
             else:
                 messages.append(HumanMessage(content=f"(You previously said): {msg.content}"))
 
-        if groq_api_key:
-            try:
-                print("DEBUG: Using Groq (Llama 3.3) for simulation")
-                sim_llm = ChatGroq(
-                    model_name="llama-3.3-70b-versatile",
-                    groq_api_key=groq_api_key,
-                    temperature=0.8
-                )
-                response = sim_llm.invoke(messages)
-                return {"content": response.content}
-            except Exception as e:
-                print(f"WARN: Groq failed: {e}. Falling back to Gemini.")
+        # Groq API Key is currently INVALID/Expired. Skipping directly to Gemini for speed.
+        # if groq_api_key:
+        #     try:
+        #         print("DEBUG: Using Groq (Llama 3.3) for simulation")
+        #         sim_llm = ChatGroq(
+        #             model_name="llama-3.3-70b-versatile",
+        #             groq_api_key=groq_api_key,
+        #             temperature=0.8
+        #         )
+        #         response = sim_llm.invoke(messages)
+        #         return {"content": response.content}
+        #     except Exception as e:
+        #         print(f"WARN: Groq failed: {e}. Falling back to Gemini.")
         
         if google_api_key:
             print("DEBUG: Using Gemini for simulation fallback")
@@ -200,10 +204,26 @@ async def chat_simulation(req: ChatRequest):
                 temperature=0.8
             )
             response = sim_llm.invoke(messages)
-            return {"content": response.content}
+            
+            # Helper to ensure we send a String, not a complex object
+            final_content = response.content
+            if isinstance(final_content, list):
+                # If it's a list of blocks (common in newer LangChain versions), join the text parts
+                text_parts = []
+                for block in final_content:
+                    if isinstance(block, dict) and block.get("type") == "text":
+                        text_parts.append(block.get("text", ""))
+                    elif isinstance(block, str):
+                        text_parts.append(block)
+                final_content = "\n".join(text_parts)
+            
+            return {"content": str(final_content)}
             
         raise HTTPException(status_code=400, detail="No LLM provider available for chat.")
     except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"ERROR in chat_simulation: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

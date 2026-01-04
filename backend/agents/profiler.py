@@ -77,12 +77,12 @@ Example Structure:
     { "platform": "LinkedIn", "url": "https://linkedin.com/in/username" },
     { "platform": "GitHub", "url": "https://github.com/username" }
   ],
-  "simulation_prompt": "Speak concisely."
+  "simulation_prompt": "You are [Name]. specific tone/style instructions... Act human, not like a bot."
 }
 
 ### CONSTRAINTS
 - Be specific. Do not use generic horoscopes.
-- The 'simulation_prompt' is critical. It must capture their 'Voice'.
+- The 'simulation_prompt' is critical. It must instructions for natural conversation (e.g. "Speak casually, use slang", or "Be formal but polite").
 """
 
 
