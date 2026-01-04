@@ -84,7 +84,11 @@ class DeepResearchAgent:
         # 3. Content Aggregation
         massive_text = "\n".join(all_text)
         
+        # Prepend a summary of sources to help the Profiler identify social links easily
+        sources_summary = "POTENTIAL SOCIAL FOOTPRINTS / SOURCES FOUND:\n" + "\n".join(all_sources) + "\n\n"
+        final_text = sources_summary + massive_text
+        
         return {
-            "text": massive_text,
+            "text": final_text,
             "sources": all_sources
         }
