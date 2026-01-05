@@ -42,20 +42,20 @@ MEETING CONTEXT:
 Task: Create a strategic "Battle Card" for this meeting.
 Structure your response exactly as follows:
 
-### 🛡️ Strategic Approach
+### Strategic Approach
 (1-2 sentences on the overall vibe)
 
-### ✅ DOs
+### DOs
 - (Bullet point)
 - (Bullet point)
 - (Bullet point)
 
-### ❌ DON'Ts
+### DON'Ts
 - (Bullet point)
 - (Bullet point)
 - (Bullet point)
 
-### 🗣️ Suggested Opening Line
+### Suggested Opening Line
 "(Write a distinct opening line)"
 """
 

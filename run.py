@@ -40,35 +40,35 @@ def run_command(command, cwd=None, env=None):
     )
 
 def main():
-    print("🚀 Initializing The Mentalist PRO...")
+    print("Initializing The Mentalist PRO...")
     
     python_exec = get_python_executable()
-    print(f"🐍 Using Python: {python_exec}")
+    print(f"Using Python: {python_exec}")
 
     # 1. Setup Backend
-    print("📦 Verifying Backend Dependencies...")
+    print("Verifying Backend Dependencies...")
     try:
         # Try to install within the detected python environment
         subprocess.check_call([python_exec, "-m", "pip", "install", "-r", "requirements.txt"])
     except Exception as e:
-        print(f"⚠️ Warning: Dependency check skipped or failed (common in system-managed envs).")
+        print(f"Warning: Dependency check skipped or failed (common in system-managed envs).")
         print(f"   If you haven't installed dependencies, please run: source venv/bin/activate && pip install -r requirements.txt")
 
     # 2. Setup Frontend
-    print("⚛️ Verifying Frontend Dependencies...")
+    print("Verifying Frontend Dependencies...")
     frontend_dir = os.path.join(os.getcwd(), "frontend")
     if not os.path.exists(os.path.join(frontend_dir, "node_modules")):
-        print("📦 node_modules not found. Running npm install...")
+        print("node_modules not found. Running npm install...")
         try:
             subprocess.check_call(["npm", "install"], cwd=frontend_dir)
         except Exception as e:
-            print(f"❌ Failed to install frontend dependencies: {e}")
+            print(f"Failed to install frontend dependencies: {e}")
             sys.exit(1)
 
     # 3. Start Processes
     processes = []
     try:
-        print("📡 Starting FastAPI Backend (Port 8000)...")
+        print("Starting FastAPI Backend (Port 8000)...")
         # Force UTF-8 encoding for backend to handle emojis/unicode correctly on Windows
         backend_env = {"PYTHONIOENCODING": "utf-8"}
         backend_proc = run_command(
@@ -77,13 +77,13 @@ def main():
         )
         processes.append(backend_proc)
 
-        print("💻 Starting Vite Frontend (Port 5173)...")
+        print("Starting Vite Frontend (Port 5173)...")
         frontend_proc = run_command("npm run dev", cwd=frontend_dir)
         processes.append(frontend_proc)
 
-        print("\n✅ All systems active!")
-        print("🔗 Frontend: http://localhost:5173")
-        print("🔗 Backend API: http://localhost:8000")
+        print("\nAll systems active!")
+        print("Frontend: http://localhost:5173")
+        print("Backend API: http://localhost:8000")
         print("\nPress Ctrl+C to shutdown.\n")
 
         # Pipe output from backend and frontend for visibility
@@ -102,19 +102,19 @@ def main():
             time.sleep(1)
             # Check if any process has died
             if backend_proc.poll() is not None:
-                print("❌ Backend process terminated unexpectedly.")
+                print("Backend process terminated unexpectedly.")
                 break
             if frontend_proc.poll() is not None:
-                print("❌ Frontend process terminated unexpectedly.")
+                print("Frontend process terminated unexpectedly.")
                 break
             
     except KeyboardInterrupt:
-        print("\n🛑 Shutting down AI-Profiler...")
+        print("\nShutting down AI-Profiler...")
     finally:
         for p in processes:
             p.terminate()
             p.wait()
-        print("👋 Goodbye!")
+        print("Goodbye!")
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, User, Bot, Loader2 } from 'lucide-react';
+import { Send, User, MessageSquare, Loader2, Sparkles, Terminal } from 'lucide-react';
 import { chatSimulation } from '../lib/api';
+import { twMerge } from 'tailwind-merge';
 
 const ChatSimulator = ({ targetName, context, profile }) => {
     const [messages, setMessages] = useState([]);
@@ -32,38 +33,37 @@ const ChatSimulator = ({ targetName, context, profile }) => {
             setMessages([...newHistory, { role: 'assistant', content: result.content }]);
         } catch (error) {
             console.error("Chat error:", error);
-            // Optional: Add error toast here
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="bg-hueco-white border border-black/10 shadow-2xl shadow-black/5 h-[700px] flex flex-col relative overflow-hidden">
+        <div className="bg-white border border-charcoal-900/5 h-[700px] flex flex-col relative overflow-hidden shadow-2xl shadow-charcoal-900/5">
             {/* Header */}
-            <div className="p-6 border-b border-black/5 bg-white/80 backdrop-blur-md flex items-center justify-between z-10">
+            <div className="p-8 border-b border-charcoal-900/5 flex items-center justify-between z-10 bg-white/80 backdrop-blur-md">
                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-shinigami-black text-white flex items-center justify-center shadow-lg shadow-hogyoku-purple/20 border border-white/10">
-                        <Bot className="w-5 h-5" />
+                    <div className="w-10 h-10 border border-charcoal-900/10 rounded-full flex items-center justify-center">
+                        <MessageSquare className="w-5 h-5 text-charcoal-900" />
                     </div>
                     <div>
-                        <h3 className="font-serif font-black text-shinigami-black text-sm uppercase tracking-wide">Target: {targetName}</h3>
-                        <p className="text-[9px] text-hogyoku-purple font-black flex items-center gap-2 uppercase tracking-[0.2em] mt-1">
-                            <span className="w-1.5 h-1.5 bg-hogyoku-purple animate-pulse-slow rotate-45" />
-                            Reiatsu Active
+                        <h3 className="font-serif font-bold text-charcoal-900 text-lg">{targetName}</h3>
+                        <p className="text-[10px] text-charcoal-900/40 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                            Active Stimulation
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar bg-hueco-white">
+            <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar bg-cream-50/30">
                 {messages.length === 0 && (
                     <div className="flex flex-col items-center justify-center h-full text-center space-y-6 opacity-40">
-                        <div className="p-6 border border-black/10 transition-transform duration-700 hover:rotate-180">
-                            <Bot className="w-8 h-8 text-shinigami-black" />
+                        <div className="p-6 border border-dashed border-charcoal-900/20 rounded-full">
+                            <Sparkles className="w-6 h-6 text-charcoal-900" />
                         </div>
-                        <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.3em] max-w-[250px] leading-relaxed">
-                            Projection Initialized. <br /> Do not avert your eyes.
+                        <p className="text-charcoal-900 text-xs uppercase tracking-[0.2em] max-w-[250px] leading-relaxed">
+                            Simulation Environment Ready. <br /> Begin Interaction.
                         </p>
                     </div>
                 )}
@@ -74,41 +74,43 @@ const ChatSimulator = ({ targetName, context, profile }) => {
                         className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                         <div
-                            className={`max-w-[85%] px-6 py-4 shadow-sm border border-black/5 ${msg.role === 'user'
-                                ? 'bg-shinigami-black text-white'
-                                : 'bg-white text-shinigami-black border-black/10'
-                                }`}
+                            className={twMerge(
+                                "max-w-[80%] px-8 py-5 text-sm leading-relaxed shadow-sm",
+                                msg.role === 'user'
+                                    ? 'bg-charcoal-900 text-cream-50 rounded-2xl rounded-tr-none'
+                                    : 'bg-white border border-charcoal-900/5 text-charcoal-900 rounded-2xl rounded-tl-none'
+                            )}
                         >
-                            <p className="text-xs font-bold leading-loose tracking-wide">{msg.content}</p>
+                            <p className="font-sans">{msg.content}</p>
                         </div>
                     </div>
                 ))}
                 {loading && (
                     <div className="flex justify-start">
-                        <div className="bg-white border border-hogyoku-purple/30 text-hogyoku-purple px-6 py-3 flex items-center gap-3 shadow-[0_0_15px_-5px_rgba(124,58,237,0.2)]">
-                            <Loader2 className="w-3 h-3 animate-spin text-hogyoku-purple" />
-                            <span className="text-[9px] font-black uppercase tracking-[0.3em]">Calculating...</span>
+                        <div className="bg-white border border-charcoal-900/5 px-6 py-3 flex items-center gap-3 rounded-full shadow-sm">
+                            <Loader2 className="w-3 h-3 animate-spin text-charcoal-900" />
+                            <span className="text-[10px] uppercase tracking-[0.2em] text-charcoal-900/50">Processing Response...</span>
                         </div>
                     </div>
                 )}
                 <div ref={messagesEndRef} />
             </div>
 
-            <form onSubmit={handleSend} className="p-6 border-t border-black/5 bg-white">
+            <form onSubmit={handleSend} className="p-8 border-t border-charcoal-900/5 bg-white">
                 <div className="relative flex items-center group">
                     <input
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder="Speak..."
-                        className="w-full bg-gray-50/50 border-b border-black/10 text-shinigami-black text-sm pr-14 py-4 focus:outline-none focus:border-hogyoku-purple focus:bg-white transition-all placeholder:text-gray-300 font-bold tracking-wide rounded-none"
+                        placeholder="Type your message..."
+                        className="w-full bg-transparent border-b border-charcoal-900/10 py-4 pr-12 text-charcoal-900 placeholder:text-charcoal-900/30 focus:border-gold-400 focus:outline-none transition-colors font-sans"
                     />
                     <button
                         type="submit"
                         disabled={!input.trim() || loading}
-                        className="absolute right-0 p-3 bg-white hover:bg-shinigami-black hover:text-white disabled:opacity-0 transition-all text-shinigami-black border border-transparent hover:border-black active:scale-95 duration-500"
+                        className="absolute right-0 p-2 text-charcoal-900/40 hover:text-charcoal-900 disabled:opacity-0 transition-all hover:scale-110 active:scale-95"
                     >
-                        <Send className="w-4 h-4" />
+                        <Send className="w-5 h-5" />
                     </button>
                 </div>
             </form>

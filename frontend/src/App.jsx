@@ -3,8 +3,8 @@ import Layout from './components/Layout';
 import InputForm from './components/InputForm';
 import ResultsView from './components/ResultsView';
 import ChatSimulator from './components/ChatSimulator';
-import { analyzeProfile } from './lib/api';
-import { Loader2 } from 'lucide-react';
+import RevealCard from './components/ui/RevealCard';
+import { motion } from 'framer-motion';
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -16,23 +16,31 @@ function App() {
   const [targetName, setTargetName] = useState('');
   const [meetingContext, setMeetingContext] = useState('');
 
+  // Scroll to top when results are loaded
+  React.useEffect(() => {
+    if (profileData) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [profileData]);
+
   const handleAnalysis = async ({ name, context }) => {
     setLoading(true);
-    setLogs(["📡 Establishing connection to intelligence core..."]);
+    setLogs(["Initializing behavioral lexicon...", "Accessing open-source intelligence...", "Synthesizing psychological profile..."]);
     setTargetName(name);
     setMeetingContext(context);
     setProfileData(null);
 
+    // Simulation of streaming for now or standard fetch structure, keeping consistent with logic
+    // We will assume existing logic works, just replacing UI wrapper
+
     try {
-      // Use EventSource for real-time streaming
       const url = `/api/analyze/stream?name=${encodeURIComponent(name)}&context=${encodeURIComponent(context)}`;
       const eventSource = new EventSource(url);
 
       eventSource.onmessage = (event) => {
         const payload = JSON.parse(event.data);
-
         if (payload.type === 'status') {
-          setLogs(prev => [...prev, payload.data]);
+          setLogs(prev => [...prev.slice(-4), payload.data]); // Keep only last few logs
         } else if (payload.type === 'final') {
           const data = payload.data;
           setProfileData(data.profile);
@@ -42,13 +50,11 @@ function App() {
           eventSource.close();
           setLoading(false);
         } else if (payload.type === 'error') {
-          console.error("Analysis stream error:", payload.data);
-          alert(`Analysis failed: ${payload.data}`);
+          console.error("Stream error:", payload.data);
           eventSource.close();
           setLoading(false);
         }
       };
-
       eventSource.onerror = (err) => {
         console.error("EventSource failed:", err);
         eventSource.close();
@@ -57,7 +63,6 @@ function App() {
 
     } catch (error) {
       console.error("Analysis failed:", error);
-      alert("Failed to connect to the intelligence server.");
       setLoading(false);
     }
   };
@@ -65,30 +70,38 @@ function App() {
   return (
     <Layout>
       {!profileData ? (
-        <div className="py-10">
-          <div className="text-center mb-10 space-y-4">
-            <h2 className="text-4xl md:text-5xl font-black text-shinigami-black tracking-tight leading-tight">
-              Decode Psychology. <br />
-              <span className="text-hogyoku">
-                Win Every Interaction.
-              </span>
-            </h2>
-            <p className="text-[15px] text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
-              Stop guessing. Start knowing who you're dealing with using advanced AI behavioral profiling and real-time conversation simulation.
+        <div className="flex flex-col items-center justify-center min-h-[70vh] w-full text-center">
+          <RevealCard className="border-none shadow-none bg-transparent p-0 max-w-4xl mx-auto">
+            <h1 className="text-6xl md:text-8xl font-serif text-charcoal-900 mb-6 tracking-tight leading-[0.9]">
+              The Art of <br />
+              <span className="italic text-gold-400">Persuasion</span>
+            </h1>
+            <p className="text-sm md:text-base text-charcoal-900/60 max-w-lg mx-auto leading-relaxed mb-12">
+              Advanced behavioral profiling and negotiation intelligence. <br />
+              Understand your counterpart before you even say hello.
             </p>
-          </div>
 
-          <InputForm onSubmit={handleAnalysis} loading={loading} logs={logs} />
+            <div className="max-w-xl mx-auto w-full">
+              <InputForm onSubmit={handleAnalysis} loading={loading} logs={logs} />
+            </div>
+          </RevealCard>
         </div>
       ) : (
-        <div className="space-y-12 pb-20">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-black text-shinigami-black border-l-4 border-hogyoku-purple pl-4 uppercase tracking-tighter">
-              Analysis Results: <span className="text-hogyoku-purple">{targetName}</span>
-            </h2>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="space-y-24 py-12"
+        >
+          {/* Header Section for Results */}
+          <div className="flex flex-col md:flex-row items-end justify-between border-b border-charcoal-900/10 pb-8">
+            <div>
+              <h2 className="text-4xl font-serif text-charcoal-900 mb-2">{targetName}</h2>
+              <p className="text-xs uppercase tracking-[0.2em] text-charcoal-900/50">Comprehensive Behavioral Dossier</p>
+            </div>
             <button
               onClick={() => setProfileData(null)}
-              className="text-[10px] font-bold text-gray-400 hover:text-shinigami-black transition-colors underline uppercase tracking-widest cursor-pointer"
+              className="mt-6 md:mt-0 text-xs font-bold uppercase tracking-widest border-b border-transparent hover:border-charcoal-900 transition-all"
             >
               Start New Analysis
             </button>
@@ -101,36 +114,29 @@ function App() {
             sources={sources}
           />
 
-          <div className="mt-16">
-            <h2 className="text-2xl font-black text-shinigami-black mb-8 flex items-center gap-2 border-l-4 border-hogyoku-purple pl-4 uppercase tracking-tighter">
-              Live <span className="text-hogyoku-purple">Simulator</span>
-            </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-1 space-y-6">
-                <div className="glass-card p-6 bg-white/90 shadow-lg border border-slate-200">
-                  <h4 className="text-xs font-bold text-slate-900 mb-3 uppercase tracking-widest">Simulation Context</h4>
-                  <p className="text-sm text-slate-500 leading-relaxed font-medium">{meetingContext}</p>
-                </div>
-                <div className="glass-card p-6 bg-white/90 shadow-lg border-l-4 border-l-hogyoku-indigo border-y-black/5 border-r-black/5">
-                  <h4 className="text-xs font-bold text-shinigami-black mb-3 uppercase tracking-widest flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-hogyoku-indigo" />
-                    Pro Tip
-                  </h4>
-                  <p className="text-sm text-slate-500 leading-relaxed font-medium italic">
-                    Use the psychological triggers found in the profile to steer the conversation effectively.
-                  </p>
-                </div>
+          {/* Simulator Section */}
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div className="lg:col-span-4 space-y-8">
+              <div>
+                <h3 className="font-serif text-2xl mb-4">Simulation</h3>
+                <p className="text-sm text-charcoal-900/70 leading-relaxed">
+                  Practice your approach in a safe, AI-driven environment configured to mimic {targetName}'s psychological profile.
+                </p>
               </div>
-              <div className="lg:col-span-2">
-                <ChatSimulator
-                  targetName={targetName}
-                  context={meetingContext}
-                  profile={profileData}
-                />
+              <div className="p-6 bg-white border border-charcoal-900/5">
+                <h4 className="text-[10px] uppercase tracking-widest text-charcoal-900/40 mb-4">Context</h4>
+                <p className="text-sm italic text-charcoal-900 font-serif">"{meetingContext}"</p>
               </div>
             </div>
-          </div>
-        </div>
+            <div className="lg:col-span-8">
+              <ChatSimulator
+                targetName={targetName}
+                context={meetingContext}
+                profile={profileData}
+              />
+            </div>
+          </section>
+        </motion.div>
       )}
     </Layout>
   );

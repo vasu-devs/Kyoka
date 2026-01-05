@@ -57,7 +57,7 @@ async def analysis_generator(name: str, context: str):
     # 1. Start Research in a thread
     async def run_pipeline():
         try:
-            status_callback("⚡ Initializing Deep Intelligence Scan...")
+            status_callback("Initializing Deep Intelligence Scan...")
             researcher = DeepResearchAgent(tavily_api_key=tavily_api_key)
             
             # This is sync, so we run it in a thread
@@ -68,7 +68,7 @@ async def analysis_generator(name: str, context: str):
                 status_callback=status_callback
             )
             
-            status_callback("🧠 Constructing Behavioral Neural Matrix...")
+            status_callback("Constructing Behavioral Neural Matrix...")
             profiler = PsychProfiler(api_key=google_api_key)
             analysis_result = await asyncio.to_thread(
                 profiler.analyze_psychology, 
@@ -77,7 +77,7 @@ async def analysis_generator(name: str, context: str):
                 context=context
             )
             
-            status_callback("🎯 Generating Strategic Tactical Protocol...")
+            status_callback("Generating Strategic Tactical Protocol...")
             strategist = MeetingStrategist(api_key=google_api_key)
             strategy_doc = await asyncio.to_thread(
                 strategist.generate_strategy,

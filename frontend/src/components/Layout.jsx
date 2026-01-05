@@ -1,55 +1,59 @@
-import React from 'react';
-import { Brain, Sparkles } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Layout = ({ children }) => {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-hueco-white text-shinigami-black overflow-x-hidden selection:bg-hogyoku-purple selection:text-white">
-      {/* Dynamic Background - The Void */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-hogyoku-purple/5 blur-[150px] rounded-full animate-pulse-slow" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-hogyoku-indigo/5 blur-[120px] rounded-full animate-pulse-slow" style={{ animationDelay: '-2s' }} />
-      </div>
-
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Header */}
-        {/* Header - Shattered Glass */}
-        <div className="flex items-center justify-between mb-16 px-6 py-6 shattered-glass border-b border-black/10">
-          <div className="flex items-center space-x-6">
-            <div className="p-3 bg-shinigami-black text-white rounded-none shadow-2xl shadow-hogyoku-purple/20">
-              <Brain className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-serif font-black tracking-tighter text-shinigami-black uppercase flex items-center gap-2">
-                Kyoka Suigetsu
-                <span className="text-[9px] font-bold px-2 py-0.5 bg-shinigami-black text-white border border-black uppercase tracking-[0.2em]">PRO</span>
-              </h1>
-              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] mt-1 ml-1">
-                Complete Hypnosis Intelligence
-              </p>
-            </div>
+    <div className="min-h-screen w-full relative bg-cream-50 font-sans text-charcoal-900 selection:bg-gold-400 selection:text-white overflow-x-hidden">
+      {/* Navbar */}
+      <motion.header
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 flex items-center justify-between px-8 md:px-16 h-24 ${scrolled ? 'bg-white/80 backdrop-blur-md border-b border-black/5' : 'bg-transparent'
+          }`}
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full border border-charcoal-900 flex items-center justify-center">
+            <span className="font-serif font-bold text-lg leading-none pt-1">K</span>
           </div>
-
-          <div className="hidden md:flex items-center space-x-4 px-6 py-3 border border-black/10 bg-white/50 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-none bg-hogyoku-purple opacity-75"></span>
-                <span className="relative inline-flex rounded-none h-2 w-2 bg-hogyoku-purple rotate-45"></span>
-              </span>
-              <span className="text-[9px] font-bold text-shinigami-black uppercase tracking-[0.2em]">Awakened</span>
-            </div>
-            <div className="h-4 w-[1px] bg-black/10" />
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-hogyoku-purple" />
-              <span className="text-[9px] font-bold text-shinigami-black uppercase tracking-[0.2em] leading-none">Hogyoku Core</span>
-            </div>
-          </div>
+          <span className="font-serif font-bold text-xl tracking-tight">Kyoka</span>
         </div>
 
-        {/* Content */}
-        <div className="relative">
+        <nav className="hidden md:flex items-center gap-10">
+          {['Methodology', 'Case Studies', 'About'].map((item) => (
+            <a key={item} href="#" className="text-xs uppercase tracking-[0.2em] font-medium text-charcoal-900/60 hover:text-charcoal-900 transition-colors">
+              {item}
+            </a>
+          ))}
+        </nav>
+
+        <button className="text-xs uppercase tracking-[0.2em] font-bold border-b border-charcoal-900 pb-1 hover:text-gold-500 hover:border-gold-500 transition-all">
+          Menu
+        </button>
+      </motion.header>
+
+      {/* Main Content */}
+      <main className="pt-32 pb-20 px-6 md:px-12 container mx-auto max-w-7xl min-h-screen flex flex-col">
+        <AnimatePresence mode="wait">
           {children}
-        </div>
+        </AnimatePresence>
       </main>
+
+      {/* Footer */}
+      <footer className="py-12 border-t border-charcoal-900/10 flex flex-col md:flex-row items-center justify-between px-12 text-[10px] uppercase tracking-[0.2em] text-charcoal-900/40">
+        <span>© 2026 Kyoka Intelligence</span>
+        <div className="flex gap-8 mt-4 md:mt-0">
+          <a href="#" className="hover:text-charcoal-900 transition-colors">Privacy</a>
+          <a href="#" className="hover:text-charcoal-900 transition-colors">Terms</a>
+        </div>
+      </footer>
     </div>
   );
 };
