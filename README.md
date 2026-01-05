@@ -90,9 +90,19 @@ Built with **React**, **Vite**, and **Tailwind CSS**, the UI is designed to feel
     *The `run.py` script will automatically create a virtual environment, install python dependencies (`requirements.txt`), install frontend modules (`npm install`), and launch both servers in parallel.*
 
 ### Environment Config
-Create a `.env` file in the root:
+Create a `.env` file in the root. You will need keys for the following services:
+
+| Service | Variable Name | Description | Get Key |
+| :--- | :--- | :--- | :--- |
+| **Google Gemini** | `GOOGLE_API_KEY` | Primary Intelligence (Strategist) | [Get Key](https://aistudio.google.com/app/apikey) |
+| **DeepSeek** | `DEEPSEEK_API_KEY` | Deep Reasoning (Profiler) | [Get Key](https://platform.deepseek.com/api_keys) |
+| **Groq** | `GROQ_API_KEY` | Fast Inference (Optional/Fallback) | [Get Key](https://console.groq.com/keys) |
+| **Tavily** | `TAVILY_API_KEY` | Deep Research (OSINT) | [Get Key](https://tavily.com/) |
+
 ```env
 GOOGLE_API_KEY=your_gemini_key
+DEEPSEEK_API_KEY=your_deepseek_key
+GROQ_API_KEY=your_groq_key
 TAVILY_API_KEY=your_tavily_key
 ```
 
